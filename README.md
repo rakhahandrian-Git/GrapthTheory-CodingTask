@@ -1,5 +1,5 @@
 # GrapthTheory-CodingTask
-Group 1 Coding Task
+## Group 1 Coding Task
 
 <div align=center>
 
