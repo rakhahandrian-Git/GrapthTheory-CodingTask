@@ -1,4 +1,5 @@
-# GrapthTheory-CodingTask
+# Informatics ITS Graph Theory IUP
+
 ## Group 1 Coding Task
 
 <div align=center>
