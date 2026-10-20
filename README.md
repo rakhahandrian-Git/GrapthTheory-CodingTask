@@ -13,4 +13,4 @@
 
 </div>
 
-PDF File:
+PDF File: https://docs.google.com/document/d/1_sJAWmgg4S_MahBCo6bMXIgZKmMro35bYo6wm1N8zHM/edit?usp=sharing
