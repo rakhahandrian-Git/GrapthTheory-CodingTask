@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DLH Surabaya - Chinese Postman Problem (CPP) Suite</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Vis.js Network for Interactive Graph Visualization -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    .navbar {
+      background-color: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+    #map {
+      height: calc(100vh - 62px);
+      width: 100%;
+      border-radius: 0;
+      z-index: 10;
+    }
+    .sidebar {
+      height: calc(100vh - 62px);
+      overflow-y: auto;
+      background-color: #1e293b;
+      border-left: 1px solid #334155;
+      padding: 1.25rem;
+    }
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      border-radius: 8px;
+    }
+    .metric-badge {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+    .metric-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+    }
+    .step-list {
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .step-item {
+      padding: 6px 10px;
+      border-bottom: 1px solid #334155;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .step-item:hover {
+      background-color: #334155;
+    }
+    .badge-revisit {
+      background-color: #f59e0b;
+      color: #000;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .badge-new {
+      background-color: #10b981;
+      color: #fff;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .leaflet-control-layers {
+      background: #1e293b !important;
+      color: #f8fafc !important;
+      border: 1px solid #475569 !important;
+      border-radius: 6px !important;
+      padding: 6px 10px !important;
+      font-size: 0.85rem !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4) !important;
+    }
+    .leaflet-control-layers label {
+      cursor: pointer;
+      margin-bottom: 3px;
+    }
+    /* Custom Graph Playground Styles */
+    #customGraphCanvas {
+      width: 100%;
+      height: 400px;
+      background-color: #0b1329;
+      border: 1px solid #334155;
+      border-radius: 8px;
+    }
+    .preset-btn {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    .preset-btn:hover {
+      transform: translateY(-1px);
+    }
+    .code-editor {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.85rem;
+      background-color: #0b1329 !important;
+      color: #38bdf8 !important;
+      border: 1px solid #334155 !important;
+    }
+    .circuit-ribbon {
+      background-color: #0b1329;
+      border: 1px solid #38bdf8;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 0.95rem;
+      color: #facc15;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar with Mode Switcher -->
+  <nav class="navbar navbar-dark px-3 py-2">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <span class="navbar-brand mb-0 h1 d-flex align-items-center gap-2">
+          <i class="fa-solid fa-route text-warning"></i>
+          <span><strong>Chinese Postman Problem (CPP)</strong></span>
+        </span>
+
+        <!-- Tab Switcher -->
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-primary active" id="tabMapBtn" onclick="switchMainTab('map')">
+            <i class="fa-solid fa-map-location-dot me-1"></i> DLH Surabaya Map Simulator
+          </button>
+          <button type="button" class="btn btn-outline-info" id="tabGraphBtn" onclick="switchMainTab('graph')">
+            <i class="fa-solid fa-diagram-project me-1"></i> Custom Graph Playground
+          </button>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#slide6Modal">
+          <i class="fa-solid fa-circle-question me-1"></i> Slide 6 Benchmark
+        </button>
+        <span class="badge bg-secondary">ITS Graph Theory &bull; Task 2</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 1: DLH SURABAYA MAP SIMULATOR (SLIDE 7)                           -->
+  <!-- ===================================================================== -->
+  <div id="viewMapSimulator" class="container-fluid p-0">
+    <div class="row g-0">
+      <!-- Left Map View -->
+      <div class="col-lg-8 col-md-7 position-relative">
+        <div id="map"></div>
+        
+        <!-- Quick Control Overlay on Map -->
+        <div class="position-absolute top-0 start-0 m-3 p-2 rounded shadow card bg-dark bg-opacity-75" style="z-index: 1000; max-width: 320px;">
+          <small class="text-secondary fw-bold mb-1 d-block"><i class="fa-solid fa-location-crosshairs text-info me-1"></i> Quick Presets</small>
+          <div class="d-flex flex-wrap gap-1">
+            <button class="btn btn-xs btn-outline-light py-1 px-2 text-nowrap" style="font-size: 11px;" onclick="setPreset(-7.280, 112.795, 'Bundaran ITS')">Bundaran ITS</button>
+            <button class="btn btn-xs btn-outline-light py-1 px-2 text-nowrap" style="font-size: 11px;" onclick="setPreset(-7.265, 112.748, 'Stasiun Gubeng')">Gubeng</button>
+            <button class="btn btn-xs btn-outline-light py-1 px-2 text-nowrap" style="font-size: 11px;" onclick="setPreset(-7.260, 112.738, 'Tunjungan Plaza')">Tunjungan</button>
+            <button class="btn btn-xs btn-outline-light py-1 px-2 text-nowrap" style="font-size: 11px;" onclick="setPreset(-7.262, 112.753, 'Balai Kota')">Balai Kota</button>
+          </div>
+          <small class="text-muted mt-2 d-block" style="font-size: 11px;">
+            <i class="fa-solid fa-info-circle me-1"></i> Click anywhere on the map to set dump truck base!
+          </small>
+        </div>
+      </div>
+
+      <!-- Right Control & Metrics Sidebar -->
+      <div class="col-lg-4 col-md-5 sidebar">
+        <!-- Control Card -->
+        <div class="card p-3 mb-3">
+          <h6 class="card-title fw-bold d-flex align-items-center gap-2 mb-3">
+            <i class="fa-solid fa-sliders text-primary"></i> Simulation Parameters
+          </h6>
+
+          <!-- Coordinates -->
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label metric-label">Base Latitude</label>
+              <input type="number" id="inputLat" class="form-control form-control-sm bg-dark text-light border-secondary" step="0.0001" value="-7.2800">
+            </div>
+            <div class="col-6">
+              <label class="form-label metric-label">Base Longitude</label>
+              <input type="number" id="inputLon" class="form-control form-control-sm bg-dark text-light border-secondary" step="0.0001" value="112.7950">
+            </div>
+          </div>
+
+          <!-- Radius Slider -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label metric-label mb-0">Delivery Radius: <strong id="radiusLabel" class="text-info">1.0 km</strong></label>
+            </div>
+            <input type="range" class="form-range" id="inputRadius" min="0.5" max="3.0" step="0.25" value="1.0" oninput="updateRadiusLabel(this.value)">
+          </div>
+
+          <!-- Speed -->
+          <div class="mb-3">
+            <label class="form-label metric-label">Truck Average Speed</label>
+            <div class="input-group input-group-sm">
+              <input type="number" id="inputSpeed" class="form-control bg-dark text-light border-secondary" value="25" min="10" max="60">
+              <span class="input-group-text bg-secondary text-light border-secondary">km/h</span>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button id="btnCalculate" class="btn btn-primary w-100 fw-bold py-2" onclick="runSimulation()">
+            <i class="fa-solid fa-route me-1"></i> Find Efficient CPP Route
+          </button>
+        </div>
+
+        <!-- Metrics Dashboard -->
+        <div id="metricsPanel" class="card p-3 mb-3 d-none">
+          <h6 class="card-title fw-bold d-flex align-items-center gap-2 mb-3">
+            <i class="fa-solid fa-chart-line text-success"></i> Route Optimization Metrics
+          </h6>
+          
+          <div class="row g-2 text-center mb-3">
+            <div class="col-6">
+              <div class="p-2 rounded bg-dark border border-secondary">
+                <div class="metric-label">Total Distance</div>
+                <div id="metricTotalDist" class="metric-badge">0.0 km</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-2 rounded bg-dark border border-secondary">
+                <div class="metric-label">Estimated Time</div>
+                <div id="metricTravelTime" class="metric-badge text-warning">0.0 min</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-2 rounded bg-dark border border-secondary">
+                <div class="metric-label">CPP Execution Time</div>
+                <div id="metricExecTime" class="metric-badge text-info">0.0 ms</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-2 rounded bg-dark border border-secondary">
+                <div class="metric-label">Roads Visited</div>
+                <div id="metricSegments" class="metric-badge text-light">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Efficiency breakdown -->
+          <div class="small text-secondary mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span>Required Roads Distance:</span>
+              <strong id="metricOrigDist" class="text-light">0.0 km</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Revisited / Duplicate Distance:</span>
+              <strong id="metricDupDist" class="text-warning">0.0 km</strong>
+            </div>
+          </div>
+
+          <!-- Animation Controls -->
+          <div class="border-top border-secondary pt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small fw-bold"><i class="fa-solid fa-play me-1 text-info"></i> Route Playback</span>
+              <span id="stepCounter" class="badge bg-secondary">0 / 0</span>
+            </div>
+            <div class="d-flex gap-2">
+              <button id="btnPlay" class="btn btn-sm btn-outline-success flex-fill" onclick="togglePlayRoute()">
+                <i class="fa-solid fa-play me-1"></i> Play
+              </button>
+              <button class="btn btn-sm btn-outline-warning flex-fill" onclick="resetAnimation()">
+                <i class="fa-solid fa-rotate-left me-1"></i> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Traversal Order List -->
+        <div id="traversalPanel" class="card p-3 d-none">
+          <h6 class="card-title fw-bold d-flex justify-content-between align-items-center mb-2">
+            <span><i class="fa-solid fa-list-ol text-warning me-1"></i> Street Traversal Order</span>
+            <span id="traversalCount" class="badge bg-primary">0 steps</span>
+          </h6>
+          <div id="traversalList" class="step-list border rounded border-secondary">
+            <!-- Traversal steps populated via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 2: CUSTOM GRAPH PLAYGROUND (ANY GRAPH INPUT & PRESETS)            -->
+  <!-- ===================================================================== -->
+  <div id="viewGraphPlayground" class="container-fluid p-3 d-none">
+    <div class="row g-3">
+      <!-- Left Column: Graph Configuration & Presets -->
+      <div class="col-lg-5">
+        <!-- Presets Card -->
+        <div class="card p-3 mb-3">
+          <h6 class="fw-bold text-info mb-2">
+            <i class="fa-solid fa-bookmark me-1"></i> Ready-to-Use Graph Presets
+          </h6>
+          <p class="small text-muted mb-2">Click any preset to instantly load and solve it:</p>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-warning btn-sm preset-btn" onclick="loadPreset('slide6')">
+              📌 Slide 6 Benchmark (Cost 69)
+            </button>
+            <button class="btn btn-outline-info btn-sm preset-btn" onclick="loadPreset('directed')">
+              📌 Digraph with Shortcut (Cost 45)
+            </button>
+            <button class="btn btn-outline-success btn-sm preset-btn" onclick="loadPreset('envelope')">
+              📌 House / Envelope (All Even &bull; 0 Dup)
+            </button>
+            <button class="btn btn-outline-light btn-sm preset-btn" onclick="loadPreset('konigsberg')">
+              📌 Königsberg 7 Bridges
+            </button>
+            <button class="btn btn-outline-primary btn-sm preset-btn" onclick="loadPreset('surabaya_micro')">
+              📌 Surabaya DLH Micro-Grid
+            </button>
+            <button class="btn btn-outline-secondary btn-sm preset-btn" onclick="loadPreset('k4_clique')">
+              📌 Complete Graph K4
+            </button>
+          </div>
+        </div>
+
+        <!-- Graph Input Editor Card -->
+        <div class="card p-3 mb-3">
+          <h6 class="fw-bold text-light mb-3">
+            <i class="fa-solid fa-pen-to-square text-primary me-1"></i> Custom Graph Input
+          </h6>
+
+          <!-- Type Selector -->
+          <div class="mb-3">
+            <label class="form-label metric-label">Graph Orientation</label>
+            <div class="btn-group w-100" role="group">
+              <input type="radio" class="btn-check" name="graphTypeRadio" id="radioUndirected" value="undirected" checked>
+              <label class="btn btn-outline-info btn-sm py-2" for="radioUndirected">
+                <i class="fa-solid fa-arrows-left-right me-1"></i> Undirected Graph
+              </label>
+
+              <input type="radio" class="btn-check" name="graphTypeRadio" id="radioDirected" value="directed">
+              <label class="btn btn-outline-warning btn-sm py-2" for="radioDirected">
+                <i class="fa-solid fa-arrow-right-long me-1"></i> Directed (Digraph)
+              </label>
+            </div>
+          </div>
+
+          <!-- Start Node -->
+          <div class="mb-3">
+            <label class="form-label metric-label">Starting Vertex</label>
+            <input type="text" id="customStartNode" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="e.g. A or 1 (leave blank for auto)">
+          </div>
+
+          <!-- Edges Textarea -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label metric-label mb-0">Edge List (Format: <code>u v weight [name]</code>)</label>
+              <small class="text-muted" style="font-size: 11px;">One edge per line</small>
+            </div>
+            <textarea id="customEdgesInput" class="form-control code-editor p-2" rows="9" placeholder="A D 2&#10;C B 12&#10;B E 17&#10;D E 18&#10;B D 7&#10;A C 6"></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2">
+            <button id="btnSolveCustom" class="btn btn-primary flex-grow-1 fw-bold py-2" onclick="solveCustomGraph()">
+              <i class="fa-solid fa-play me-1"></i> Solve Chinese Postman
+            </button>
+            <button class="btn btn-outline-secondary px-3" onclick="clearCustomInput()">
+              <i class="fa-solid fa-eraser"></i> Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Visualizer & Solution Output -->
+      <div class="col-lg-7">
+        <!-- Interactive Graph Canvas -->
+        <div class="card p-3 mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0 text-light d-flex align-items-center gap-2">
+              <i class="fa-solid fa-circle-nodes text-info"></i> Interactive Graph Visualizer
+            </h6>
+            <div class="d-flex gap-2 align-items-center">
+              <span id="customStepCounter" class="badge bg-secondary">Step: 0 / 0</span>
+              <button id="btnCustomPlay" class="btn btn-sm btn-outline-success py-1 px-2" onclick="togglePlayCustomTour()">
+                <i class="fa-solid fa-play me-1"></i> Play Walkthrough
+              </button>
+              <button class="btn btn-sm btn-outline-light py-1 px-2" onclick="stepCustomTour()">
+                <i class="fa-solid fa-forward-step me-1"></i> Step
+              </button>
+              <button class="btn btn-sm btn-outline-warning py-1 px-2" onclick="resetCustomTour()">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Vis.js container -->
+          <div id="customGraphCanvas"></div>
+          
+          <div class="d-flex justify-content-between align-items-center mt-2 small text-muted">
+            <div>
+              <span class="me-2"><span style="color: #38bdf8;">&#9679;</span> Normal Vertex</span>
+              <span class="me-2"><span style="color: #10b981;">&#9679;</span> Start Node</span>
+              <span class="me-2"><span style="color: #f59e0b;">&bull;&bull;&bull;</span> Duplicated Edge</span>
+              <span><span style="color: #ef4444;">&#9679;</span> Active Postman</span>
+            </div>
+            <small>Drag nodes &bull; Scroll to zoom</small>
+          </div>
+        </div>
+
+        <!-- Solution Metrics & Traversal Order -->
+        <div id="customResultPanel" class="card p-3 d-none">
+          <h6 class="fw-bold text-success mb-3">
+            <i class="fa-solid fa-square-poll-vertical me-1"></i> CPP Optimization Results
+          </h6>
+
+          <!-- Metrics Row -->
+          <div class="row g-2 text-center mb-3">
+            <div class="col-3">
+              <div class="p-2 rounded bg-dark border border-secondary">
+                <div class="metric-label">Total Tour Cost</div>
+                <div id="customTotalCost" class="metric-badge text-success">0</div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="p-2 rounded bg-dark border border-secondary">
+                <div class="metric-label">Original Edges</div>
+                <div id="customOrigCost" class="metric-badge text-light">0</div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="p-2 rounded bg-dark border border-secondary">
+                <div class="metric-label">Added Duplicates</div>
+                <div id="customAddedCost" class="metric-badge text-warning">+0</div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="p-2 rounded bg-dark border border-secondary">
+                <div class="metric-label">Execution Time</div>
+                <div id="customExecTime" class="metric-badge text-info">0 ms</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Circuit Ribbon -->
+          <div class="mb-3">
+            <label class="metric-label d-block mb-1">Closed Eulerian Tour Sequence</label>
+            <div id="customCircuitStr" class="circuit-ribbon"></div>
+          </div>
+
+          <!-- Detail Tabs -->
+          <ul class="nav nav-pills nav-fill mb-2" id="customDetailTabs" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active py-1 small" data-bs-toggle="tab" data-bs-target="#tabAnalysis">
+                <i class="fa-solid fa-scale-balanced me-1"></i> Degree & Parity Analysis
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link py-1 small" data-bs-toggle="tab" data-bs-target="#tabSteps">
+                <i class="fa-solid fa-list-check me-1"></i> Step-by-Step Traversal
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content pt-2">
+            <!-- Degree / Balance Tab -->
+            <div class="tab-pane fade show active" id="tabAnalysis">
+              <div id="customAnalysisBox" class="p-2 bg-dark rounded border border-secondary small">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+            
+            <!-- Steps Tab -->
+            <div class="tab-pane fade" id="tabSteps">
+              <div id="customStepsBox" class="step-list border rounded border-secondary">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 6 Benchmark Modal -->
+  <div class="modal fade" id="slide6Modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-dark text-light border-secondary">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title"><i class="fa-solid fa-diagram-project text-info me-2"></i>Task 2: Slide 6 Benchmark Verification</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted mb-3">
+            Verification of the illustration provided on Assignment Slide 6 (5 nodes, 6 edges, target cost = <strong>69</strong>).
+          </p>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <div class="p-3 bg-secondary bg-opacity-25 rounded border border-secondary">
+                <h6 class="fw-bold text-info">Assignment Edges & Costs</h6>
+                <ul class="list-unstyled small mb-0">
+                  <li>A &mdash; D : 2</li>
+                  <li>C &mdash; B : 12</li>
+                  <li>B &mdash; E : 17</li>
+                  <li>D &mdash; E : 18</li>
+                  <li>B &mdash; D : 7</li>
+                  <li>A &mdash; C : 6</li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 bg-secondary bg-opacity-25 rounded border border-secondary">
+                <h6 class="fw-bold text-warning">Algorithmic Resolution</h6>
+                <ul class="list-unstyled small mb-0">
+                  <li>Odd-Degree Nodes: <strong>B (deg 3), D (deg 3)</strong></li>
+                  <li>Shortest Path (B, D): <strong>7</strong></li>
+                  <li>Original Cost: <strong>62</strong></li>
+                  <li>Duplicated Path: <strong>+7</strong></li>
+                  <li>Total Closed Tour: <span class="badge bg-success fs-6">69</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div id="slide6ResultBox" class="p-3 rounded bg-black text-monospace small">
+            <em>Click below to compute with solver...</em>
+          </div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button class="btn btn-outline-info" onclick="fetchSlide6Data()">Run Verification Solver</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // =========================================================================
+    // TAB SWITCHING (MAP SIMULATOR VS CUSTOM GRAPH PLAYGROUND)
+    // =========================================================================
+    function switchMainTab(tab) {
+      const mapTabBtn = document.getElementById('tabMapBtn');
+      const graphTabBtn = document.getElementById('tabGraphBtn');
+      const mapView = document.getElementById('viewMapSimulator');
+      const graphView = document.getElementById('viewGraphPlayground');
+
+      if (tab === 'map') {
+        mapTabBtn.classList.add('btn-primary', 'active');
+        mapTabBtn.classList.remove('btn-outline-info');
+        graphTabBtn.classList.remove('btn-primary', 'active');
+        graphTabBtn.classList.add('btn-outline-info');
+
+        mapView.classList.remove('d-none');
+        graphView.classList.add('d-none');
+
+        setTimeout(() => map.invalidateSize(), 150);
+      } else {
+        graphTabBtn.classList.add('btn-primary', 'active');
+        graphTabBtn.classList.remove('btn-outline-info');
+        mapTabBtn.classList.remove('btn-primary', 'active');
+        mapTabBtn.classList.add('btn-outline-info');
+
+        graphView.classList.remove('d-none');
+        mapView.classList.add('d-none');
+
+        if (!visNetwork) {
+          loadPreset('slide6');
+        } else {
+          setTimeout(() => visNetwork.fit(), 150);
+        }
+      }
+    }
+
+    // =========================================================================
+    // MAP SIMULATOR LOGIC (LEAFLET + GOOGLE SATELLITE HYBRID)
+    // =========================================================================
+    const defaultLat = -7.2800;
+    const defaultLon = 112.7950;
+    const map = L.map('map').setView([defaultLat, defaultLon], 14);
+
+    // Google Satellite Layers
+    const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+      attribution: '&copy; Google Maps',
+      maxZoom: 20
+    });
+    const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      attribution: '&copy; Google Maps',
+      maxZoom: 20
+    });
+    const googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+      attribution: '&copy; Google Maps',
+      maxZoom: 20
+    });
+    const osmStandard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    });
+
+    googleHybrid.addTo(map);
+
+    L.control.layers({
+      "Google Satellite (Hybrid)": googleHybrid,
+      "Google Satellite (Clean)": googleSatellite,
+      "Google Streets": googleStreets,
+      "OpenStreetMap": osmStandard
+    }, null, { position: 'topright' }).addTo(map);
+
+    const networkLayer = L.layerGroup().addTo(map);
+    const routeLayer = L.layerGroup().addTo(map);
+    let baseMarker = null;
+    let radiusCircle = null;
+    let truckMarker = null;
+
+    let mapAnimationInterval = null;
+    let mapAnimationIndex = 0;
+    let currentMapRouteCoords = [];
+
+    updateBasePin(defaultLat, defaultLon);
+
+    function updateBasePin(lat, lon) {
+      document.getElementById('inputLat').value = lat.toFixed(4);
+      document.getElementById('inputLon').value = lon.toFixed(4);
+
+      if (baseMarker) map.removeLayer(baseMarker);
+      if (radiusCircle) map.removeLayer(radiusCircle);
+
+      const rad = parseFloat(document.getElementById('inputRadius').value) * 1000;
+
+      baseMarker = L.marker([lat, lon], { draggable: true }).addTo(map);
+      baseMarker.bindPopup("<b>DLH Dump Truck Base</b><br>Drag to reposition base.").openPopup();
+
+      baseMarker.on('dragend', function (e) {
+        const pos = e.target.getLatLng();
+        updateBasePin(pos.lat, pos.lng);
+      });
+
+      radiusCircle = L.circle([lat, lon], {
+        radius: rad,
+        color: '#38bdf8',
+        fillColor: '#0284c7',
+        fillOpacity: 0.15,
+        weight: 2,
+        dashArray: '4, 6'
+      }).addTo(map);
+    }
+
+    map.on('click', function (e) {
+      updateBasePin(e.latlng.lat, e.latlng.lng);
+    });
+
+    function updateRadiusLabel(val) {
+      document.getElementById('radiusLabel').innerText = parseFloat(val).toFixed(2) + " km";
+      if (radiusCircle && baseMarker) {
+        radiusCircle.setRadius(parseFloat(val) * 1000);
+      }
+    }
+
+    function setPreset(lat, lon, name) {
+      map.setView([lat, lon], 14);
+      updateBasePin(lat, lon);
+      runSimulation();
+    }
+
+    async function runSimulation() {
+      const lat = parseFloat(document.getElementById('inputLat').value);
+      const lon = parseFloat(document.getElementById('inputLon').value);
+      const radius = parseFloat(document.getElementById('inputRadius').value);
+      const speed = parseFloat(document.getElementById('inputSpeed').value);
+
+      const btn = document.getElementById('btnCalculate');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Solving CPP...';
+
+      try {
+        const resp = await fetch('/api/simulate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lat, lon, radius_km: radius, speed_kmh: speed })
+        });
+        const data = await resp.json();
+
+        if (!data.success) {
+          alert("Error: " + (data.error || "Failed to calculate route."));
+          return;
+        }
+
+        renderSimulationResults(data);
+      } catch (err) {
+        alert("Request error: " + err);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-route me-1"></i> Find Efficient CPP Route';
+      }
+    }
+
+    function renderSimulationResults(data) {
+      networkLayer.clearLayers();
+      routeLayer.clearLayers();
+      resetAnimation();
+
+      document.getElementById('metricsPanel').classList.remove('d-none');
+      document.getElementById('traversalPanel').classList.remove('d-none');
+
+      const m = data.metrics;
+      document.getElementById('metricTotalDist').innerText = m.total_distance_km + " km";
+      document.getElementById('metricTravelTime').innerText = m.estimated_time_minutes + " min";
+      document.getElementById('metricExecTime').innerText = m.solver_time_ms + " ms";
+      document.getElementById('metricSegments').innerText = m.road_segments_count;
+      document.getElementById('metricOrigDist').innerText = m.original_distance_km + " km";
+      document.getElementById('metricDupDist').innerText = m.duplicated_distance_km + " km";
+
+      (data.network_lines || []).forEach(line => {
+        L.polyline(line.coords, {
+          color: '#38bdf8',
+          weight: 2,
+          opacity: 0.55
+        }).addTo(networkLayer);
+      });
+
+      currentMapRouteCoords = data.route_coords || [];
+      if (currentMapRouteCoords.length > 0) {
+        L.polyline(currentMapRouteCoords, {
+          color: '#000000',
+          weight: 7,
+          opacity: 0.7
+        }).addTo(routeLayer);
+
+        const routePolyline = L.polyline(currentMapRouteCoords, {
+          color: '#facc15',
+          weight: 4,
+          opacity: 0.95
+        }).addTo(routeLayer);
+
+        map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
+      }
+
+      const listContainer = document.getElementById('traversalList');
+      listContainer.innerHTML = '';
+      const order = data.traversal_order || [];
+      document.getElementById('traversalCount').innerText = order.length + " steps";
+
+      order.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'step-item';
+        const badge = item.is_revisit
+          ? '<span class="badge-revisit">Revisit</span>'
+          : '<span class="badge-new">Required</span>';
+        div.innerHTML = `
+          <div>
+            <strong class="text-secondary">#${item.step}</strong> 
+            <span class="ms-1">${item.street}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="text-muted small">${item.distance_m}m</span>
+            ${badge}
+          </div>
+        `;
+        listContainer.appendChild(div);
+      });
+
+      document.getElementById('stepCounter').innerText = `0 / ${currentMapRouteCoords.length}`;
+    }
+
+    function togglePlayRoute() {
+      const btn = document.getElementById('btnPlay');
+      if (mapAnimationInterval) {
+        clearInterval(mapAnimationInterval);
+        mapAnimationInterval = null;
+        btn.innerHTML = '<i class="fa-solid fa-play me-1"></i> Play';
+      } else {
+        if (currentMapRouteCoords.length === 0) return;
+        btn.innerHTML = '<i class="fa-solid fa-pause me-1"></i> Pause';
+        
+        if (!truckMarker) {
+          const truckIcon = L.divIcon({
+            html: '<i class="fa-solid fa-truck text-danger" style="font-size: 20px; filter: drop-shadow(0 0 2px black);"></i>',
+            className: 'truck-icon-wrapper',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+          truckMarker = L.marker(currentMapRouteCoords[0], { icon: truckIcon }).addTo(map);
+        }
+
+        mapAnimationInterval = setInterval(() => {
+          if (mapAnimationIndex >= currentMapRouteCoords.length) {
+            clearInterval(mapAnimationInterval);
+            mapAnimationInterval = null;
+            btn.innerHTML = '<i class="fa-solid fa-rotate-left me-1"></i> Replay';
+            return;
+          }
+          const pt = currentMapRouteCoords[mapAnimationIndex];
+          truckMarker.setLatLng(pt);
+          mapAnimationIndex++;
+          document.getElementById('stepCounter').innerText = `${mapAnimationIndex} / ${currentMapRouteCoords.length}`;
+        }, 80);
+      }
+    }
+
+    function resetAnimation() {
+      if (mapAnimationInterval) {
+        clearInterval(mapAnimationInterval);
+        mapAnimationInterval = null;
+      }
+      mapAnimationIndex = 0;
+      if (truckMarker) {
+        map.removeLayer(truckMarker);
+        truckMarker = null;
+      }
+      document.getElementById('btnPlay').innerHTML = '<i class="fa-solid fa-play me-1"></i> Play';
+      if (currentMapRouteCoords.length > 0) {
+        document.getElementById('stepCounter').innerText = `0 / ${currentMapRouteCoords.length}`;
+      }
+    }
+
+    async function fetchSlide6Data() {
+      const box = document.getElementById('slide6ResultBox');
+      box.innerHTML = "Computing with cpp_solver.py...";
+      try {
+        const resp = await fetch('/api/slide6');
+        const res = await resp.json();
+        const r = res.result;
+        box.innerHTML = `
+          <div class="text-success fw-bold">[SUCCESS] Optimal Eulerian Circuit Generated!</div>
+          <div>Odd Nodes Identified : <strong>${r.odd_nodes.join(', ')}</strong></div>
+          <div>Minimum Weight Matching: <strong>${JSON.stringify(r.matching_pairs)}</strong> (Cost: +${r.added_cost})</div>
+          <div>Closed Eulerian Circuit: <strong>${r.circuit.join(' &rarr; ')}</strong></div>
+          <div class="mt-2 text-info">Total Circuit Cost: <strong>${r.total_cost} meters</strong> (Original: ${r.original_cost} + Added: ${r.added_cost})</div>
+        `;
+      } catch (e) {
+        box.innerHTML = `<span class="text-danger">Error: ${e}</span>`;
+      }
+    }
+
+    // =========================================================================
+    // CUSTOM GRAPH PLAYGROUND LOGIC (VIS.JS INTERACTIVE VISUALIZER)
+    // =========================================================================
+    let visNetwork = null;
+    let visNodesDataSet = null;
+    let visEdgesDataSet = null;
+    let currentCustomResult = null;
+    let customTourInterval = null;
+    let customTourIndex = 0;
+
+    // Presets dictionary
+    const GRAPH_PRESETS = {
+      slide6: {
+        name: "Slide 6 Benchmark (ITS Lecture)",
+        is_directed: false,
+        start_node: "A",
+        edges_text: "A D 2\nC B 12\nB E 17\nD E 18\nB D 7\nA C 6"
+      },
+      directed: {
+        name: "Digraph with Shortcut",
+        is_directed: true,
+        start_node: "1",
+        edges_text: "1 2 10 Street_1_to_2\n2 3 10 Street_2_to_3\n3 1 10 Street_3_to_1\n1 3 5 Shortcut_1_to_3"
+      },
+      envelope: {
+        name: "House / Envelope (All Even)",
+        is_directed: false,
+        start_node: "1",
+        edges_text: "1 2 4 Base\n2 3 3 Right_Wall\n3 4 4 Ceiling\n4 1 3 Left_Wall\n1 3 5 Diagonal_A\n2 4 5 Diagonal_B\n3 5 2 Roof_Right\n4 5 2 Roof_Left"
+      },
+      konigsberg: {
+        name: "Königsberg 7 Bridges Variant",
+        is_directed: false,
+        start_node: "A",
+        edges_text: "A B 1 Bridge_1\nA B 1 Bridge_2\nA C 1 Bridge_3\nA C 1 Bridge_4\nA D 1 Bridge_5\nB D 1 Bridge_6\nC D 1 Bridge_7"
+      },
+      surabaya_micro: {
+        name: "Surabaya DLH Downtown Micro-Grid",
+        is_directed: true,
+        start_node: "Tunjungan",
+        edges_text: "Tunjungan Pemuda 1.2 Jl_Tunjungan\nPemuda YosSudarso 0.8 Jl_Pemuda\nYosSudarso GubSuryo 0.7 Jl_Yos_Sudarso\nGubSuryo Tunjungan 1.0 Jl_Gubernur_Suryo\nPemuda Gubeng 1.4 Jl_Pemuda_East\nGubeng Pemuda 1.4 Jl_Pemuda_West"
+      },
+      k4_clique: {
+        name: "Complete Graph K4",
+        is_directed: false,
+        start_node: "1",
+        edges_text: "1 2 3 Edge_12\n1 3 4 Edge_13\n1 4 2 Edge_14\n2 3 5 Edge_23\n2 4 6 Edge_24\n3 4 7 Edge_34"
+      }
+    };
+
+    function loadPreset(key) {
+      const p = GRAPH_PRESETS[key];
+      if (!p) return;
+
+      document.getElementById('customEdgesInput').value = p.edges_text;
+      document.getElementById('customStartNode').value = p.start_node;
+
+      if (p.is_directed) {
+        document.getElementById('radioDirected').checked = true;
+      } else {
+        document.getElementById('radioUndirected').checked = true;
+      }
+
+      solveCustomGraph();
+    }
+
+    function clearCustomInput() {
+      document.getElementById('customEdgesInput').value = '';
+      document.getElementById('customStartNode').value = '';
+      if (visNetwork) {
+        visNetwork.destroy();
+        visNetwork = null;
+      }
+      document.getElementById('customResultPanel').classList.add('d-none');
+    }
+
+    function parseCustomEdges(text) {
+      const lines = text.split('\n');
+      const edges = [];
+      for (let line of lines) {
+        line = line.trim();
+        if (!line || line.startsWith('#') || line.startsWith('//')) continue;
+        
+        // Split by space, tab, or comma
+        const parts = line.split(/[,\s]+/).filter(Boolean);
+        if (parts.length >= 3) {
+          const u = parts[0];
+          const v = parts[1];
+          const w = parseFloat(parts[2]);
+          const name = parts[3] || `${u}-${v}`;
+          if (!isNaN(w)) {
+            edges.push({ u, v, weight: w, name });
+          }
+        }
+      }
+      return edges;
+    }
+
+    async function solveCustomGraph() {
+      const text = document.getElementById('customEdgesInput').value;
+      const isDirected = document.getElementById('radioDirected').checked;
+      const startNode = document.getElementById('customStartNode').value.trim();
+
+      const edges = parseCustomEdges(text);
+      if (edges.length === 0) {
+        alert("Please enter at least one valid edge in the format: u v weight");
+        return;
+      }
+
+      const btn = document.getElementById('btnSolveCustom');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Solving...';
+
+      try {
+        const resp = await fetch('/api/solve-custom', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            is_directed: isDirected,
+            edges: edges,
+            start_node: startNode || null
+          })
+        });
+
+        const data = await resp.json();
+        if (!data.success) {
+          alert("Error: " + (data.error || "Failed to solve graph."));
+          return;
+        }
+
+        currentCustomResult = data;
+        renderCustomGraphSolution(data);
+      } catch (err) {
+        alert("Request error: " + err);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-play me-1"></i> Solve Chinese Postman';
+      }
+    }
+
+    function renderCustomGraphSolution(data) {
+      resetCustomTour();
+      document.getElementById('customResultPanel').classList.remove('d-none');
+
+      const res = data.result;
+      const isDirected = data.is_directed;
+
+      // Update Metric Cards
+      document.getElementById('customTotalCost').innerText = res.total_cost;
+      document.getElementById('customOrigCost').innerText = res.original_cost;
+      document.getElementById('customAddedCost').innerText = `+${res.added_cost}`;
+      document.getElementById('customExecTime').innerText = `${data.elapsed_ms} ms`;
+
+      // Circuit Ribbon
+      document.getElementById('customCircuitStr').innerHTML = res.circuit.join(' <span class="text-info fw-bold">&rarr;</span> ');
+
+      // Build Analysis Table
+      const analysisBox = document.getElementById('customAnalysisBox');
+      if (!isDirected) {
+        const deg = res.degrees || {};
+        const oddNodes = new Set(res.odd_nodes || []);
+        let html = `
+          <div class="mb-2"><strong>Vertex Degree Parity:</strong></div>
+          <div class="row g-2 mb-2">
+        `;
+        for (let u of Object.keys(deg).sort()) {
+          const isOdd = oddNodes.has(u);
+          const badgeClass = isOdd ? 'badge bg-warning text-dark' : 'badge bg-secondary';
+          const label = isOdd ? 'ODD (Unbalanced)' : 'EVEN';
+          html += `
+            <div class="col-6 col-md-4">
+              <div class="p-1 px-2 rounded bg-black border border-secondary d-flex justify-content-between">
+                <span>Node <strong>${u}</strong>: deg ${deg[u]}</span>
+                <span class="${badgeClass}">${label}</span>
+              </div>
+            </div>
+          `;
+        }
+        html += `</div>`;
+        html += `
+          <div class="mt-2 border-top border-secondary pt-2">
+            <strong>Minimum Weight Perfect Matching:</strong>
+            <span class="text-warning">${JSON.stringify(res.matching_pairs)}</span> 
+            (Shortest path distance added: <strong>+${res.added_cost}</strong>)
+          </div>
+        `;
+        analysisBox.innerHTML = html;
+      } else {
+        const inDeg = res.in_degrees || {};
+        const outDeg = res.out_degrees || {};
+        const allNodes = data.nodes || [];
+        let html = `
+          <div class="mb-2"><strong>Digraph Degree Balance (&Delta; = In - Out):</strong></div>
+          <div class="table-responsive">
+            <table class="table table-dark table-sm table-bordered text-center mb-0">
+              <thead>
+                <tr>
+                  <th>Node</th>
+                  <th>In-Degree</th>
+                  <th>Out-Degree</th>
+                  <th>Net Balance (&Delta;)</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        for (let u of allNodes) {
+          const inD = inDeg[u] || 0;
+          const outD = outDeg[u] || 0;
+          const diff = inD - outD;
+          let statusBadge = '<span class="badge bg-success">Balanced</span>';
+          if (diff > 0) statusBadge = `<span class="badge bg-info text-dark">Supply (+${diff})</span>`;
+          else if (diff < 0) statusBadge = `<span class="badge bg-warning text-dark">Demand (${diff})</span>`;
+          html += `
+            <tr>
+              <td><strong>${u}</strong></td>
+              <td>${inD}</td>
+              <td>${outD}</td>
+              <td class="${diff !== 0 ? 'text-warning fw-bold' : ''}">${diff > 0 ? '+' + diff : diff}</td>
+              <td>${statusBadge}</td>
+            </tr>
+          `;
+        }
+        html += `
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-2 text-muted small">
+            Supply nodes send directed flow to Demand nodes via shortest paths to balance the multigraph.
+          </div>
+        `;
+        analysisBox.innerHTML = html;
+      }
+
+      // Build Step-by-Step Traversal Table
+      const stepsBox = document.getElementById('customStepsBox');
+      stepsBox.innerHTML = '';
+      const circuit = res.circuit || [];
+      const edgeSteps = [];
+      for (let i = 0; i < circuit.length - 1; i++) {
+        edgeSteps.push({ from: circuit[i], to: circuit[i+1], step: i + 1 });
+      }
+
+      // Check duplicate edge counts
+      const dupEdgeSet = new Set((res.duplicated_edges || []).map(e => `${e.u}->${e.v}`));
+      edgeSteps.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'step-item';
+        div.id = `customStepItem_${s.step}`;
+        const isDup = dupEdgeSet.has(`${s.from}->${s.to}`) || (!isDirected && dupEdgeSet.has(`${s.to}->${s.from}`));
+        const badge = isDup
+          ? '<span class="badge-revisit">Revisit</span>'
+          : '<span class="badge-new">Required</span>';
+        div.innerHTML = `
+          <div>
+            <strong class="text-secondary">#${s.step}</strong>
+            <span class="ms-2"><strong>${s.from}</strong> &rarr; <strong>${s.to}</strong></span>
+          </div>
+          <div>${badge}</div>
+        `;
+        stepsBox.appendChild(div);
+      });
+
+      // Build Vis.js Interactive Graph
+      renderVisNetwork(data);
+    }
+
+    function renderVisNetwork(data) {
+      const container = document.getElementById('customGraphCanvas');
+      const res = data.result;
+      const isDirected = data.is_directed;
+      const startNode = res.start_node || data.nodes[0];
+
+      const nodesArray = data.nodes.map(nodeId => {
+        const isStart = (nodeId === startNode);
+        return {
+          id: nodeId,
+          label: String(nodeId),
+          shape: 'circle',
+          size: 20,
+          color: {
+            background: isStart ? '#10b981' : '#0284c7',
+            border: isStart ? '#34d399' : '#38bdf8',
+            highlight: { background: '#ef4444', border: '#fca5a5' }
+          },
+          font: { color: '#ffffff', size: 14, face: 'Helvetica' },
+          borderWidth: 2
+        };
+      });
+
+      const edgesArray = [];
+      let edgeCount = 0;
+
+      // Original edges
+      data.edges.forEach((e, idx) => {
+        edgesArray.push({
+          id: `orig_${idx}`,
+          from: e.u,
+          to: e.v,
+          label: String(e.weight),
+          arrows: isDirected ? 'to' : undefined,
+          color: { color: '#38bdf8', highlight: '#ef4444' },
+          width: 2,
+          font: { color: '#f8fafc', size: 11, strokeWidth: 2, strokeColor: '#0f172a' },
+          smooth: isDirected ? { type: 'curvedCW', roundness: 0.15 } : false
+        });
+        edgeCount++;
+      });
+
+      // Duplicated edges (Eulerian augmentation)
+      (res.duplicated_edges || []).forEach((dup, idx) => {
+        edgesArray.push({
+          id: `dup_${idx}`,
+          from: dup.u,
+          to: dup.v,
+          label: `${dup.weight} (dup)`,
+          arrows: isDirected ? 'to' : undefined,
+          color: { color: '#f59e0b', highlight: '#ef4444' },
+          dashes: [5, 5],
+          width: 3,
+          font: { color: '#facc15', size: 10, strokeWidth: 2, strokeColor: '#000000' },
+          smooth: { type: 'curvedCCW', roundness: 0.28 }
+        });
+        edgeCount++;
+      });
+
+      visNodesDataSet = new vis.DataSet(nodesArray);
+      visEdgesDataSet = new vis.DataSet(edgesArray);
+
+      const networkData = { nodes: visNodesDataSet, edges: visEdgesDataSet };
+      const options = {
+        physics: {
+          stabilization: true,
+          barnesHut: { gravitationalConstant: -3000, springLength: 120, springConstant: 0.04 }
+        },
+        interaction: { hover: true, tooltipDelay: 200, zoomView: true, dragView: true }
+      };
+
+      if (visNetwork) {
+        visNetwork.destroy();
+      }
+      visNetwork = new vis.Network(container, networkData, options);
+
+      document.getElementById('customStepCounter').innerText = `Step: 0 / ${res.circuit.length - 1}`;
+    }
+
+    // Custom Tour Walkthrough Controls
+    function togglePlayCustomTour() {
+      const btn = document.getElementById('btnCustomPlay');
+      if (customTourInterval) {
+        clearInterval(customTourInterval);
+        customTourInterval = null;
+        btn.innerHTML = '<i class="fa-solid fa-play me-1"></i> Play Walkthrough';
+      } else {
+        if (!currentCustomResult) return;
+        const circuit = currentCustomResult.result.circuit || [];
+        if (circuit.length < 2) return;
+
+        btn.innerHTML = '<i class="fa-solid fa-pause me-1"></i> Pause';
+        customTourInterval = setInterval(() => {
+          if (customTourIndex >= circuit.length - 1) {
+            clearInterval(customTourInterval);
+            customTourInterval = null;
+            btn.innerHTML = '<i class="fa-solid fa-rotate-left me-1"></i> Replay';
+            return;
+          }
+          stepCustomTour();
+        }, 600);
+      }
+    }
+
+    function stepCustomTour() {
+      if (!currentCustomResult || !visNetwork) return;
+      const circuit = currentCustomResult.result.circuit || [];
+      if (customTourIndex >= circuit.length - 1) return;
+
+      const fromNode = circuit[customTourIndex];
+      const toNode = circuit[customTourIndex + 1];
+      customTourIndex++;
+
+      // Highlight in vis.js
+      visNetwork.selectNodes([toNode]);
+
+      // Highlight in step table
+      document.querySelectorAll('#customStepsBox .step-item').forEach(el => el.classList.remove('bg-primary'));
+      const activeItem = document.getElementById(`customStepItem_${customTourIndex}`);
+      if (activeItem) {
+        activeItem.classList.add('bg-primary');
+        activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      document.getElementById('customStepCounter').innerText = `Step: ${customTourIndex} / ${circuit.length - 1}`;
+    }
+
+    function resetCustomTour() {
+      if (customTourInterval) {
+        clearInterval(customTourInterval);
+        customTourInterval = null;
+      }
+      customTourIndex = 0;
+      if (visNetwork) {
+        visNetwork.unselectAll();
+      }
+      document.querySelectorAll('#customStepsBox .step-item').forEach(el => el.classList.remove('bg-primary'));
+      document.getElementById('btnCustomPlay').innerHTML = '<i class="fa-solid fa-play me-1"></i> Play Walkthrough';
+      if (currentCustomResult) {
+        const cLen = (currentCustomResult.result.circuit || []).length;
+        document.getElementById('customStepCounter').innerText = `Step: 0 / ${Math.max(0, cLen - 1)}`;
+      }
+    }
+
+    // Auto-run simulation on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      runSimulation();
+    });
+  </script>
+</body>
+</html>
