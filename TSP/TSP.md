@@ -2,15 +2,13 @@
 
 ## 1. Prerequisites
 
----
-
 ### System & Environment Requirements
 
-Operating System: macOS / Linux / Windows
+**Operating System:** macOS / Linux / Windows
 
-Python Runtime: Python 3.10+ (Python 3.15 recommended via Homebrew to ensure native OpenSSL support for OpenStreetMap Overpass queries)
+**Python Runtime:** Python 3.10+ (Python 3.15 recommended via Homebrew to ensure native OpenSSL support for OpenStreetMap Overpass queries)
 
-Package Manager: pip (bundled with Python)
+**Package Manager:** pip (bundled with Python)
 
 ---
 
@@ -29,8 +27,6 @@ Package Manager: pip (bundled with Python)
 ---
 
 ## 2. How to Run
-
----
 
 ### Set Up Virtual Environment
 
@@ -99,8 +95,6 @@ streamlit run app.py
 ---
 
 ## 3. Sample Cases
-
----
 
 ### Scenario A: Small Cluster (6 Target Locations)
 
