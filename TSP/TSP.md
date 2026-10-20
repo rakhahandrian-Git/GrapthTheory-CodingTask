@@ -1,6 +1,47 @@
 # Task 3: The Knight's Tour
 
-## 1. Prerequisites
+## 1. Problem Overview & Failure Analysis
+
+### 1.1. What is the Knight's Tour Problem?
+
+The **Knight's Tour** is a foundational problem in graph theory and combinatorial optimization:
+* **Objective:** Find a sequence of legal chess moves for a knight on an $M \times N$ chessboard such that the knight visits **every single square on the board exactly once**.
+* **Graph Representation:** Modeled as an undirected graph $G = (V, E)$:
+  * **Vertices ($V$):** Every square on the chessboard ($|V| = M \cdot N$).
+  * **Edges ($E$):** Legal knight moves connecting two squares via L-shape offsets $(\Delta x, \Delta y) \in \{(\pm 1, \pm 2), (\pm 2, \pm 1)\}$.
+  * **Goal:** Finding an **open Hamiltonian Path** (a sequence visiting each vertex exactly once).
+
+---
+
+### 1.2. What Causes the Tour to Fail?
+
+When a solver outputs `path not found` (or when standard algorithms fail to solve the board), the causes fall into two distinct domains:
+
+#### A. Mathematical Impossibility (No Valid Solution Exists)
+1. **Bipartite Color Parity Imbalance (Odd $\times$ Odd Boards):**
+   * A chessboard is a **bipartite graph**; every knight move strictly alternates between Black and White squares.
+   * On an odd $\times$ odd board (e.g. $5 \times 5 = 25$ squares), there are 13 squares of the majority color (where $(x + y) \pmod 2 = 0$) and 12 squares of the minority color (where $(x + y) \pmod 2 = 1$).
+   * Any valid alternating sequence of length 25 must follow: $\text{Majority} \to \text{Minority} \to \text{Majority} \to \dots \to \text{Majority}$.
+   * **Failure condition:** If the knight begins on a minority square (e.g., `(0, 1)`), it will exhaust all 12 minority squares after 24 steps, leaving the final 25th square unreachable. Our program detects this in $\mathcal{O}(1)$ time.
+2. **Structural Bottlenecks & Small Board Dimensions:**
+   * **$1 \times N$ or $2 \times N$ boards:** Knight moves require at least 3 rows/columns to execute an L-shape; components remain permanently disconnected.
+   * **$3 \times 3$ board:** The center square `(1, 1)` has degree $0$ for a knight and cannot be reached or exited.
+   * **$4 \times 4$ board:** Corner squares possess only 2 entries/exits. It is mathematically proven that no Hamiltonian path exists on a $4 \times 4$ board because visiting corners prematurely fragments the board into isolated subgraphs.
+
+#### B. Algorithmic Failure (Why Naive Algorithms Fail)
+1. **Combinatorial State Space Explosion:**
+   * A naive Depth-First Search explores up to 8 candidate moves per square.
+   * On an $8 \times 8$ board, the search tree contains up to $\mathcal{O}(8^{64}) \approx 6.27 \times 10^{57}$ states, causing pure brute-force solvers to hang indefinitely.
+2. **The "Corner Isolation" Trap:**
+   * Corner squares have a minimal degree of 2. If a search algorithm wanders into flexible central squares early, it cuts off the only entry/exit routes to the corners.
+   * Once any unvisited square has its remaining degree reduced to 0, the tour is dead.
+3. **Warnsdorff's Solution:**
+   * **Warnsdorff's Heuristic** prevents isolation by prioritizing candidate squares with the **lowest available onward degree**. Constrained borders and corners are cleared first, preserving central crossroads for the later phases of the tour.
+   * Integrating Warnsdorff's heuristic with **backtracking** guarantees that ties or deceptive dead ends are resolved by rolling back and trying the next viable candidate.
+
+---
+
+## 2. Prerequisites
 
 ### System & Environment Requirements
 * **Operating System:** macOS / Linux / Windows
@@ -17,7 +58,7 @@
 
 ---
 
-## 2. How to Run
+## 3. How to Run
 
 ### Set Up Virtual Environment *(Optional)*
 **macOS / Linux:**
@@ -80,7 +121,7 @@ python knights_tour.py --visual < samples/sample1_slide.txt
 
 ---
 
-## 3. Sample Cases
+## 4. Sample Cases
 
 ### Scenario A: Slide 9 Standard Specification ($5 \times 5$ Dynamic Board)
 * **Board Dimensions:** $5 \times 5$ (Total 25 squares)
@@ -165,44 +206,3 @@ python knights_tour.py --visual < samples/sample1_slide.txt
 | **Path Found** | No (`path not found`) | No (`path not found`) | Correct rejection |
 | **Solver Execution Time** | 12.10 ms | **0.85 ms** | Warnsdorff prunes dead ends $\approx 14\times$ faster |
 | **Output** | `path not found` | `path not found` | Exact specification match |
-
----
-
-## 4. Problem Theory & Failure Analysis
-
-### 4.1. What is the Knight's Tour Problem?
-
-The **Knight's Tour** is a foundational problem in graph theory and combinatorial optimization:
-* **Objective:** Find a sequence of legal chess moves for a knight on an $M \times N$ chessboard such that the knight visits **every single square on the board exactly once**.
-* **Graph Representation:** Modeled as an undirected graph $G = (V, E)$:
-  * **Vertices ($V$):** Every square on the chessboard ($|V| = M \cdot N$).
-  * **Edges ($E$):** Legal knight moves connecting two squares via L-shape offsets $(\Delta x, \Delta y) \in \{(\pm 1, \pm 2), (\pm 2, \pm 1)\}$.
-  * **Goal:** Finding an **open Hamiltonian Path** (a sequence visiting each vertex exactly once).
-
----
-
-### 4.2. What Causes the Tour to Fail?
-
-When a solver outputs `path not found` (or when standard algorithms fail to solve the board), the causes fall into two distinct domains:
-
-#### A. Mathematical Impossibility (No Valid Solution Exists)
-1. **Bipartite Color Parity Imbalance (Odd $\times$ Odd Boards):**
-   * A chessboard is a **bipartite graph**; every knight move strictly alternates between Black and White squares.
-   * On an odd $\times$ odd board (e.g. $5 \times 5 = 25$ squares), there are 13 squares of the majority color (where $(x + y) \pmod 2 = 0$) and 12 squares of the minority color (where $(x + y) \pmod 2 = 1$).
-   * Any valid alternating sequence of length 25 must follow: $\text{Majority} \to \text{Minority} \to \text{Majority} \to \dots \to \text{Majority}$.
-   * **Failure condition:** If the knight begins on a minority square (e.g., `(0, 1)`), it will exhaust all 12 minority squares after 24 steps, leaving the final 25th square unreachable. Our program detects this in $\mathcal{O}(1)$ time.
-2. **Structural Bottlenecks & Small Board Dimensions:**
-   * **$1 \times N$ or $2 \times N$ boards:** Knight moves require at least 3 rows/columns to execute an L-shape; components remain permanently disconnected.
-   * **$3 \times 3$ board:** The center square `(1, 1)` has degree $0$ for a knight and cannot be reached or exited.
-   * **$4 \times 4$ board:** Corner squares possess only 2 entries/exits. It is mathematically proven that no Hamiltonian path exists on a $4 \times 4$ board because visiting corners prematurely fragments the board into isolated subgraphs.
-
-#### B. Algorithmic Failure (Why Naive Algorithms Fail)
-1. **Combinatorial State Space Explosion:**
-   * A naive Depth-First Search explores up to 8 candidate moves per square.
-   * On an $8 \times 8$ board, the search tree contains up to $\mathcal{O}(8^{64}) \approx 6.27 \times 10^{57}$ states, causing pure brute-force solvers to hang indefinitely.
-2. **The "Corner Isolation" Trap:**
-   * Corner squares have a minimal degree of 2. If a search algorithm wanders into flexible central squares early, it cuts off the only entry/exit routes to the corners.
-   * Once any unvisited square has its remaining degree reduced to 0, the tour is dead.
-3. **Warnsdorff's Solution:**
-   * **Warnsdorff's Heuristic** prevents isolation by prioritizing candidate squares with the **lowest available onward degree**. Constrained borders and corners are cleared first, preserving central crossroads for the later phases of the tour.
-   * Integrating Warnsdorff's heuristic with **backtracking** guarantees that ties or deceptive dead ends are resolved by rolling back and trying the next viable candidate.
